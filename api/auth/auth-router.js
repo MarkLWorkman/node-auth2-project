@@ -3,14 +3,14 @@ const Users = require("../users/users-model");
 const { checkUsernameExists, validateRoleName } = require("./auth-middleware");
 const { JWT_SECRET } = require("../secrets");
 const bcrypt = require("bcrypt");
-const jqt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
 router.post("/register", validateRoleName, async (req, res, next) => {
   const credentials = req.body;
 
   try {
-    const hash = bcrypt.hashSync(credentials.password);
-    credntials.password = hash;
+    const hash = bcrypt.hashSync(credentials.password, 8);
+    credentials.password = hash;
 
     const user = await Users.add(credentials);
     const token = generateToken(user);

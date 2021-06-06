@@ -7,11 +7,13 @@ const restricted = (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
 
     if (token) {
-      jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+      jwt.verify(token, secrets.jwtSecret, (err, decodedToken) => {
+        console.log(decodedToken);
         if (err) {
           res.status(401).json({ message: "Token invalid" });
         } else {
           req.decodedToken = decodedToken;
+          console.log(req.decodedToken.rolename, "restricted");
           next();
         }
       });
@@ -24,9 +26,10 @@ const restricted = (req, res, next) => {
 };
 
 const only = (role_name) => (req, res, next) => {
-  const exactRole = req.decodedToken?.rolename;
+  const realRole = req.decodedToken?.rolename;
 
-  if (exactRole === role_name) {
+  console.log(req.decodedToken, "only");
+  if (realRole === role_name) {
     next();
   } else {
     res.status(403).json({ message: "This is not for you" });
@@ -60,9 +63,9 @@ const validateRoleName = (req, res, next) => {
     if (req.body.role_name.trim() === "admin") {
       res.status(422).json({ message: "Role can not be admin" });
     } else if (req.body.role_name.trim().length > 32) {
-      res
-        .status(422)
-        .json({ message: "Role name can not be longer than 32 chars" });
+      res.status(422).json({
+        message: "Role name can not be longer than 32 chars",
+      });
     } else {
       next();
     }
